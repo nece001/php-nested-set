@@ -128,8 +128,8 @@ interface IRepository
     /**
      * 更新节点的左值和右值
      *
-     * @author gjw
-     * @created 2025-10-24 11:13:50
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param array $where
      * @param int $lft_offset

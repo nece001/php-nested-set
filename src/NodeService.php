@@ -255,8 +255,8 @@ abstract class NodeService
     /**
      * 移到目标节点前面
      *
-     * @author gjw
-     * @created 2025-10-27 10:22:56
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param INode $node
      * @param INode $target
@@ -306,8 +306,8 @@ abstract class NodeService
     /**
      * 移到目标节点后面
      *
-     * @author gjw
-     * @created 2025-10-27 10:24:18
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param INode $node
      * @param INode $target
@@ -359,8 +359,8 @@ abstract class NodeService
     /**
      * 移为目标节点首子节点
      *
-     * @author gjw
-     * @created 2025-10-27 10:38:18
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param INode $node
      * @param INode $target
@@ -412,8 +412,8 @@ abstract class NodeService
     /**
      * 移为目标节点末子节点
      *
-     * @author gjw
-     * @created 2025-10-27 10:38:33
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param INode $node
      * @param INode $target

@@ -2,6 +2,12 @@
 
 namespace Nece\NestedSet;
 
+/**
+ * 节点类
+ *
+ * @author nece001@163.com
+ * @create 2025-10-31 22:59:37
+ */
 trait Node
 {
     protected $id;
@@ -52,7 +58,7 @@ trait Node
     /**
      * 是否有子节点
      *
-     * @author gjw
+     * @author nece001@163.com
      * @created 2025-10-24 10:53:40
      *
      * @return boolean
@@ -65,8 +71,8 @@ trait Node
     /**
      * 获取节点宽度
      *
-     * @author gjw
-     * @created 2025-10-24 10:48:33
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @return int
      */
@@ -78,8 +84,8 @@ trait Node
     /**
      * 获取节点与指定左值的距离
      *
-     * @author gjw
-     * @created 2025-10-24 10:48:33
+     * @author nece001@163.com
+     * @created 2025-10-31 21:41:34
      *
      * @param int $lft
      * @return int
