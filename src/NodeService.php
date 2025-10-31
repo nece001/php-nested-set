@@ -105,15 +105,17 @@ abstract class NodeService
         $exists = $this->repository->recordExists($node->getId());
         if (!$exists) {
             $width = $node->getWidth();
+            $lft = $this->repository->getFldLft();
+            $rit = $this->repository->getFldRit();
 
             $where = array(
-                ['lft', '<', $node->getLft()],
-                ['rit', '>', $node->getRit()]
+                [$lft, '<', $node->getLft()],
+                [$rit, '>', $node->getRit()]
             );
             $this->repository->updateOffset($where, -$width, -$width);
 
             $where = array(
-                ['lft', '>', $node->getRit()],
+                [$lft, '>', $node->getRit()],
             );
             $this->repository->updateOffset($where, -$width, -$width);
         }
@@ -130,6 +132,9 @@ abstract class NodeService
      */
     public function save(INode $node)
     {
+        $lft = $this->repository->getFldLft();
+        $rit = $this->repository->getFldRit();
+
         $id = $node->getId();
         $pid = $node->getPid();
         $parent = $this->findParentNode($pid);
@@ -154,13 +159,13 @@ abstract class NodeService
             $width = $node->getWidth();
 
             $where = array(
-                ['lft', '<=', $parent->getLft()],
-                ['rit', '>=', $parent->getRit()]
+                [$lft, '<=', $parent->getLft()],
+                [$rit, '>=', $parent->getRit()]
             );
             $this->repository->updateOffset($where, null, $width);
 
             $where = array(
-                ['lft', '>', $node->getLft()],
+                [$lft, '>', $node->getLft()],
             );
             $this->repository->updateOffset($where, $width, $width);
         }
@@ -264,13 +269,13 @@ abstract class NodeService
         $rit = $this->repository->getFldRit();
 
         $where = array(
-            ['lft', '<', $target->getLft()],
-            ['rit', '>', $target->getRit()]
+            [$lft, '<', $target->getLft()],
+            [$rit, '>', $target->getRit()]
         );
         $this->repository->updateOffset($where, null, $width);
 
         $where = array(
-            ['lft', '>=', $target->getLft()],
+            [$lft, '>=', $target->getLft()],
         );
         $this->repository->updateOffset($where, $width, $width);
 
@@ -281,19 +286,19 @@ abstract class NodeService
             $distance -= $width;
         }
         $where = array(
-            ['lft', '>=', $node->getLft() + $offset],
-            ['rit', '<=', $node->getRit() + $offset],
+            [$lft, '>=', $node->getLft() + $offset],
+            [$rit, '<=', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, $distance, $distance);
 
         $where = array(
-            ['lft', '<', $node->getLft() + $offset],
-            ['rit', '>', $node->getRit() + $offset]
+            [$lft, '<', $node->getLft() + $offset],
+            [$rit, '>', $node->getRit() + $offset]
         );
         $this->repository->updateOffset($where, null, -$width);
 
         $where = array(
-            ['lft', '>', $node->getRit() + $offset],
+            [$lft, '>', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, -$width, -$width);
     }
@@ -315,13 +320,13 @@ abstract class NodeService
         $rit = $this->repository->getFldRit();
 
         $where = array(
-            ['lft', '<', $target->getLft()],
-            ['rit', '>', $target->getRit()]
+            [$lft, '<', $target->getLft()],
+            [$rit, '>', $target->getRit()]
         );
         $this->repository->updateOffset($where, null, $width);
 
         $where = array(
-            ['lft', '>', $target->getRit()],
+            [$lft, '>', $target->getRit()],
         );
         $this->repository->updateOffset($where, $width, $width);
 
@@ -334,19 +339,19 @@ abstract class NodeService
             $distance += $target->getWidth();
         }
         $where = array(
-            ['lft', '>=', $node->getLft() + $offset],
-            ['rit', '<=', $node->getRit() + $offset],
+            [$lft, '>=', $node->getLft() + $offset],
+            [$rit, '<=', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, $distance, $distance);
 
         $where = array(
-            ['lft', '<', $node->getLft() + $offset],
-            ['rit', '>', $node->getRit() + $offset]
+            [$lft, '<', $node->getLft() + $offset],
+            [$rit, '>', $node->getRit() + $offset]
         );
         $this->repository->updateOffset($where, null, -$width);
 
         $where = array(
-            ['lft', '>', $node->getRit() + $offset],
+            [$lft, '>', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, -$width, -$width);
     }
@@ -368,13 +373,13 @@ abstract class NodeService
         $rit = $this->repository->getFldRit();
 
         $where = array(
-            ['lft', '<=', $target->getLft()],
-            ['rit', '>=', $target->getRit()]
+            [$lft, '<=', $target->getLft()],
+            [$rit, '>=', $target->getRit()]
         );
         $this->repository->updateOffset($where, null, $width);
 
         $where = array(
-            ['lft', '>', $target->getLft()],
+            [$lft, '>', $target->getLft()],
         );
         $this->repository->updateOffset($where, $width, $width);
 
@@ -387,19 +392,19 @@ abstract class NodeService
             $distance += 1;
         }
         $where = array(
-            ['lft', '>=', $node->getLft() + $offset],
-            ['rit', '<=', $node->getRit() + $offset],
+            [$lft, '>=', $node->getLft() + $offset],
+            [$rit, '<=', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, $distance, $distance);
 
         $where = array(
-            ['lft', '<', $node->getLft() + $offset],
-            ['rit', '>', $node->getRit() + $offset]
+            [$lft, '<', $node->getLft() + $offset],
+            [$rit, '>', $node->getRit() + $offset]
         );
         $this->repository->updateOffset($where, null, -$width);
 
         $where = array(
-            ['lft', '>', $node->getRit() + $offset],
+            [$lft, '>', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, -$width, -$width);
     }
@@ -421,13 +426,13 @@ abstract class NodeService
         $rit = $this->repository->getFldRit();
 
         $where = array(
-            ['lft', '<=', $target->getLft()],
-            ['rit', '>=', $target->getRit()]
+            [$lft, '<=', $target->getLft()],
+            [$rit, '>=', $target->getRit()]
         );
         $this->repository->updateOffset($where, null, $width);
 
         $where = array(
-            ['lft', '>', $target->getRit()], // 与移到节点首子的差别
+            [$lft, '>', $target->getRit()], // 与移到节点首子的差别
         );
         $this->repository->updateOffset($where, $width, $width);
 
@@ -440,19 +445,19 @@ abstract class NodeService
             $distance = $distance + $target->getWidth() - 1;
         }
         $where = array(
-            ['lft', '>=', $node->getLft() + $offset],
-            ['rit', '<=', $node->getRit() + $offset],
+            [$lft, '>=', $node->getLft() + $offset],
+            [$rit, '<=', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, $distance, $distance);
 
         $where = array(
-            ['lft', '<', $node->getLft() + $offset],
-            ['rit', '>', $node->getRit() + $offset]
+            [$lft, '<', $node->getLft() + $offset],
+            [$rit, '>', $node->getRit() + $offset]
         );
         $this->repository->updateOffset($where, null, -$width);
 
         $where = array(
-            ['lft', '>', $node->getRit() + $offset],
+            [$lft, '>', $node->getRit() + $offset],
         );
         $this->repository->updateOffset($where, -$width, -$width);
     }
