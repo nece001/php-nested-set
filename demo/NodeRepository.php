@@ -120,4 +120,29 @@ class NodeRepository implements IRepository
 
         Tree::where($where)->update($data);
     }
+
+    /**
+     * 查询子节点列表（level字段为当前节点的层级数）
+     *
+     * @author nece001@163.com
+     * @create 2025-10-31 22:50:34
+     *
+     * @param int $lft
+     * @param int $rit
+     * @param int $level
+     * @return array
+     */
+    public function childList($lft, $rit, $level = 0)
+    {
+        $query = Tree::alias('c')
+            ->field(['c.*', 'COUNT(p.id) as level'])
+            ->join((new Tree())->db()->getTable('p'), 'c.' . $this->getFldLft() . '>p.' . $this->getFldLft() . ' and c.' . $this->getFldRit() . '<p.' . $this->getFldRit())
+            ->when($level, function ($query) use ($level) {
+                $query->whereRaw('COUNT(p.id) <= ' . $level);
+            })
+            ->order('c.' . $this->getFldLft());
+
+        $list = $query->select();
+        return $list->toArray();
+    }
 }

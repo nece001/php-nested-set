@@ -137,4 +137,17 @@ interface IRepository
      * @return void
      */
     public function updateOffset(array $where, $lft_offset = null, $rit_offset = null);
+
+    /**
+     * 获取子节点列表
+     *
+     * @author nece001@163.com
+     * @create 2025-10-31 22:41:56
+     *
+     * @param int $lft 父级的左值
+     * @param int $rit 父级的右值
+     * @param int $level 获取第几层的子类
+     * @return array
+     */
+    public function childList($lft, $rit, $level = 0);
 }
