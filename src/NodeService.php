@@ -2,6 +2,8 @@
 
 namespace Nece\NestedSet;
 
+use Throwable;
+
 /**
  * 节点的操作逻辑
  *
@@ -99,25 +101,33 @@ abstract class NodeService
             throw new NodeException('节点下有子节点，不能删除', 1002);
         }
 
-        $this->repository->delete($node);
+        $this->repository->startTrans();
 
-        // 记录是否还存在，存在的是软删除，不存在的是物理删除，物理删除的要收缩空出来的位置
-        $exists = $this->repository->recordExists($node->getId());
-        if (!$exists) {
-            $width = $node->getWidth();
-            $lft = $this->repository->getFldLft();
-            $rit = $this->repository->getFldRit();
+        try {
+            $this->repository->delete($node);
 
-            $where = array(
-                [$lft, '<', $node->getLft()],
-                [$rit, '>', $node->getRit()]
-            );
-            $this->repository->updateOffset($where, -$width, -$width);
+            // 记录是否还存在，存在的是软删除，不存在的是物理删除，物理删除的要收缩空出来的位置
+            $exists = $this->repository->recordExists($node->getId());
+            if (!$exists) {
+                $width = $node->getWidth();
+                $lft = $this->repository->getFldLft();
+                $rit = $this->repository->getFldRit();
 
-            $where = array(
-                [$lft, '>', $node->getRit()],
-            );
-            $this->repository->updateOffset($where, -$width, -$width);
+                $where = array(
+                    [$lft, '<', $node->getLft()],
+                    [$rit, '>', $node->getRit()]
+                );
+                $this->repository->updateOffset($where, -$width, -$width);
+
+                $where = array(
+                    [$lft, '>', $node->getRit()],
+                );
+                $this->repository->updateOffset($where, -$width, -$width);
+            }
+            $this->repository->commit();
+        } catch (Throwable $e) {
+            $this->repository->rollback();
+            throw $e;
         }
     }
 
@@ -139,38 +149,46 @@ abstract class NodeService
         $pid = $node->getPid();
         $parent = $this->findParentNode($pid);
 
-        if ($id) {
-            $raw = $this->repository->findById($id);
-            if (!$raw) {
-                throw new NodeException('节点不存在', 1003);
+        $this->repository->startTrans();
+
+        try {
+            if ($id) {
+                $raw = $this->repository->findById($id);
+                if (!$raw) {
+                    throw new NodeException('节点不存在', 1003);
+                }
+
+                if ($raw->getPid() != $node->getPid()) {
+                    $this->move($node, $parent, self::POSITION_LAST_CHILD);
+                    $fresh = $this->find($node->getId());
+
+                    $node->setLft($fresh->getLft());
+                    $node->setRit($fresh->getRit());
+                }
+            } else {
+                $node->setPid($parent->getId());
+                $node->setLft($parent->getRit());
+                $node->setRit($parent->getRit() + 1);
+                $width = $node->getWidth();
+
+                $where = array(
+                    [$lft, '<=', $parent->getLft()],
+                    [$rit, '>=', $parent->getRit()]
+                );
+                $this->repository->updateOffset($where, null, $width);
+
+                $where = array(
+                    [$lft, '>', $node->getLft()],
+                );
+                $this->repository->updateOffset($where, $width, $width);
             }
 
-            if ($raw->getPid() != $node->getPid()) {
-                $this->move($node, $parent, self::POSITION_LAST_CHILD);
-                $fresh = $this->find($node->getId());
-
-                $node->setLft($fresh->getLft());
-                $node->setRit($fresh->getRit());
-            }
-        } else {
-            $node->setPid($parent->getId());
-            $node->setLft($parent->getRit());
-            $node->setRit($parent->getRit() + 1);
-            $width = $node->getWidth();
-
-            $where = array(
-                [$lft, '<=', $parent->getLft()],
-                [$rit, '>=', $parent->getRit()]
-            );
-            $this->repository->updateOffset($where, null, $width);
-
-            $where = array(
-                [$lft, '>', $node->getLft()],
-            );
-            $this->repository->updateOffset($where, $width, $width);
+            $this->repository->save($node);
+            $this->repository->commit();
+        } catch (Throwable $e) {
+            $this->repository->rollback();
+            throw $e;
         }
-
-        $this->repository->save($node);
     }
 
     /**
@@ -188,22 +206,32 @@ abstract class NodeService
     {
         // 防止节点移动到自身
         if ($node->getId() != $target->getId()) {
-            if ($position == self::POSITION_BEFORE) {
-                if ($node->getRit() - $target->getLft() != 1) {
-                    $this->moveToBefore($node, $target);
+
+            $this->repository->startTrans();
+
+            try {
+                if ($position == self::POSITION_BEFORE) {
+                    if ($node->getRit() - $target->getLft() != 1) {
+                        $this->moveToBefore($node, $target);
+                    }
+                } elseif ($position == self::POSITION_AFTER) {
+                    if ($target->getRit() - $node->getLft() != 1) {
+                        $this->moveToAfter($node, $target);
+                    }
+                } elseif ($position == self::POSITION_FIRSTT_CHILD) {
+                    if ($node->getLft() - $target->getLft() != 1) {
+                        $this->moveToFirstChild($node, $target);
+                    }
+                } elseif ($position == self::POSITION_LAST_CHILD) {
+                    if ($node->getRit() - $target->getRit() != 1) {
+                        $this->moveToLastChild($node, $target);
+                    }
                 }
-            } elseif ($position == self::POSITION_AFTER) {
-                if ($target->getRit() - $node->getLft() != 1) {
-                    $this->moveToAfter($node, $target);
-                }
-            } elseif ($position == self::POSITION_FIRSTT_CHILD) {
-                if ($node->getLft() - $target->getLft() != 1) {
-                    $this->moveToFirstChild($node, $target);
-                }
-            } elseif ($position == self::POSITION_LAST_CHILD) {
-                if ($node->getRit() - $target->getRit() != 1) {
-                    $this->moveToLastChild($node, $target);
-                }
+
+                $this->repository->commit();
+            } catch (Throwable $e) {
+                $this->repository->rollback();
+                throw $e;
             }
         }
     }

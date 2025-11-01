@@ -1,5 +1,6 @@
 <?php
 
+use Nece\NestedSet\FldRepository;
 use Nece\NestedSet\INode;
 use Nece\NestedSet\IRepository;
 use think\facade\Db;
@@ -12,20 +13,7 @@ use think\facade\Db;
  */
 class NodeRepository implements IRepository
 {
-    public function getFldPid()
-    {
-        return 'pid';
-    }
-
-    public function getFldLft()
-    {
-        return 'lft';
-    }
-
-    public function getFldRit()
-    {
-        return 'rit';
-    }
+    use FldRepository;
 
     public function recordExists($id)
     {
