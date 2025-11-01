@@ -112,7 +112,7 @@ interface IRepository
      * @param INode $node
      * @return void
      */
-    public function delete(INode $node);
+    public function delete($node);
 
     /**
      * 保存节点
@@ -123,7 +123,7 @@ interface IRepository
      * @param INode $node
      * @return void
      */
-    public function save(INode $node);
+    public function save($node);
 
     /**
      * 更新节点的左值和右值

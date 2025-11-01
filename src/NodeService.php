@@ -76,7 +76,7 @@ abstract class NodeService
      * @param int $id
      * @return INode|null
      */
-    public function find($id)
+    public function findNode($id)
     {
         return $this->repository->findById($id);
     }
@@ -140,7 +140,7 @@ abstract class NodeService
      * @param INode $node
      * @return void
      */
-    public function save(INode $node)
+    public function save($node)
     {
         $lft = $this->repository->getFldLft();
         $rit = $this->repository->getFldRit();
@@ -160,7 +160,7 @@ abstract class NodeService
 
                 if ($raw->getPid() != $node->getPid()) {
                     $this->move($node, $parent, self::POSITION_LAST_CHILD);
-                    $fresh = $this->find($node->getId());
+                    $fresh = $this->repository->findById($node->getId());
 
                     $node->setLft($fresh->getLft());
                     $node->setRit($fresh->getRit());
@@ -202,7 +202,7 @@ abstract class NodeService
      * @param int $position
      * @return void
      */
-    public function move(INode $node, INode $target, int $position)
+    public function move($node, $target, int $position)
     {
         // 防止节点移动到自身
         if ($node->getId() != $target->getId()) {
@@ -290,7 +290,7 @@ abstract class NodeService
      * @param INode $target
      * @return void
      */
-    private function moveToBefore(INode $node, INode $target)
+    private function moveToBefore($node, $target)
     {
         $width = $node->getWidth();
         $lft = $this->repository->getFldLft();
@@ -341,7 +341,7 @@ abstract class NodeService
      * @param INode $target
      * @return void
      */
-    private function moveToAfter(INode $node, INode $target)
+    private function moveToAfter($node, $target)
     {
         $width = $node->getWidth();
         $lft = $this->repository->getFldLft();
@@ -394,7 +394,7 @@ abstract class NodeService
      * @param INode $target
      * @return void
      */
-    private function moveToFirstChild(INode $node, INode $target)
+    private function moveToFirstChild($node, $target)
     {
         $width = $node->getWidth();
         $lft = $this->repository->getFldLft();
@@ -447,7 +447,7 @@ abstract class NodeService
      * @param INode $target
      * @return void
      */
-    private function moveToLastChild(INode $node, INode $target)
+    private function moveToLastChild($node, $target)
     {
         $width = $node->getWidth();
         $lft = $this->repository->getFldLft();
